@@ -9,7 +9,6 @@ import bs4
 import bs4.element
 import openpyxl.styles
 import pendulum
-
 import schireson_excel.compose.attributes
 from schireson_excel.compose.style import style_range
 
