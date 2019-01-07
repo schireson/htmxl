@@ -1,0 +1,153 @@
+version: 2
+####################################################################################################
+#
+# REUSABLE MAPPINGS
+#   especially steps used in multiple jobs) should be added here
+#
+####################################################################################################
+authenticate-aws: &authenticate-aws
+  run:
+    name: Enable aws authentication
+    command: |
+      aws configure set default.region "${AWS_DEFAULT_REGION:-us-east-1}"
+      printf "${AWS_CREDENTIALS}" > ~/.aws/credentials
+
+configure_pip: &configure_pip
+  run:
+    name: Configure Pip with artifactory
+    command: |
+      mkdir ~/.pip
+      echo -e "[global]\nindex-url = https://artifactory.schireson.com/artifactory/api/pypi/pypi/simple\ntrusted-host = artifactory.schireson.com" > ~/.pip/pip.conf
+
+install_package: &install_package
+  run:
+    name: Install dependencies
+    command: |
+      python -m venv .venv
+      source .venv/bin/activate
+      lucha aws whitelist -- pip install dist/schireson-excel-0.1.0.tar.gz[testing]
+
+install_package_docs: &install_package_docs
+  run:
+    name: Install dependencies
+    command: |
+      python -m venv .venv
+      source .venv/bin/activate
+      lucha aws whitelist -- pip install dist/schireson-excel-0.1.0.tar.gz[docs]
+
+####################################################################################################
+#
+# WORKFLOWS:
+#
+#   build_test_publish:
+#     This workflow builds artifacts, runs the tests, and publishes a python package to artifactory
+#
+####################################################################################################
+workflows:
+  version: 2
+  build_test_publish:
+    jobs:
+      - build
+      - lint:
+          requires:
+            - build
+      - test:
+          requires:
+              - build
+      - docs:
+          requires:
+              - build
+      - publish:
+          requires:
+            - build
+            - lint
+            - test
+          filters:
+            branches:
+              only:
+                - /^master$/
+
+####################################################################################################
+#
+# JOBS
+#
+####################################################################################################
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6.4
+    steps:
+      - checkout
+      - run:
+          name: Build package artifacts
+          command: python setup.py sdist bdist_wheel
+      - persist_to_workspace:
+          # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
+          # taken to be the root directory of the workspace.
+          root: dist
+          # Must be relative path from root
+          paths:
+            - schireson-excel-0.1.0.tar.gz
+            - schireson_excel-0.1.0-py3-none-any.whl
+
+  test:
+    docker:
+      - image: schireson/cicd-python
+    steps:
+      - checkout
+      - attach_workspace:
+          at: dist
+      - <<: *authenticate-aws
+      - <<: *configure_pip
+      - <<: *install_package
+      - run:
+          name: Unit Test
+          command: |
+            source .venv/bin/activate
+            lucha test
+
+  lint:
+    docker:
+      - image: schireson/cicd-python
+    steps:
+      - checkout
+      - attach_workspace:
+          at: dist
+      - <<: *authenticate-aws
+      - <<: *configure_pip
+      - <<: *install_package
+      - run:
+          name: Lint
+          command: |
+            source .venv/bin/activate
+            lucha lint
+
+  docs:
+    docker:
+      - image: schireson/cicd-python
+    steps:
+      - checkout
+      - attach_workspace:
+          at: dist
+      - <<: *authenticate-aws
+      - <<: *configure_pip
+      - <<: *install_package_docs
+      - run:
+          name: Build Docs
+          command: |
+            source .venv/bin/activate
+            sphinx-build docs/source docs/build
+      - store_artifacts:
+          path: docs/build
+
+  publish:
+    docker:
+      - image: schireson/cicd-python
+    steps:
+      - attach_workspace:
+          at: dist
+      - <<: *authenticate-aws
+      - <<: *configure_pip
+      - run:
+          name: Publish Python Distribution to Artifactory
+          command: lucha aws whitelist -- lucha cicd publish pypi --no-build
