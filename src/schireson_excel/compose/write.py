@@ -207,9 +207,7 @@ def write(element, writer, styler, style=None):
             write(value, writer, styler, style)
 
     else:
-        if isinstance(
-            element, (str, int, float, bool, pendulum.DateTime, pendulum.Date)
-        ):
+        if isinstance(element, (str, int, float, bool, pendulum.DateTime, pendulum.Date)):
             write_value(element, writer, styler, style)
 
 
@@ -287,9 +285,7 @@ def inline_styleable(fn):
     def wrapper(element, writer, styler, style):
         element, recording = fn(element, writer, styler, style)
         writer.style_inline(
-            element=element,
-            included_cells=recording,
-            inline_style=styler.get_inline_style(element),
+            element=element, included_cells=recording, inline_style=styler.get_inline_style(element)
         )
         return element, recording
 
@@ -361,9 +357,7 @@ def write_th(element, writer, styler, style):
 def write_table(element, writer, styler, style):
     logger.debug("Writing <table> at {}".format(writer.ref))
     style = styler.get_style(element) or style
-    autofilter = element.get(
-        schireson_excel.compose.attributes.DATA_AUTOFILTER, "false"
-    )
+    autofilter = element.get(schireson_excel.compose.attributes.DATA_AUTOFILTER, "false")
 
     with writer.record() as recording:
         for sub_component in element:

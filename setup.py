@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 INSTALL_REQUIRES = [
     'beautifulsoup4~=4.6',
-    'openpyxl~=2.5',
+    'openpyxl==2.5',  # See https://bitbucket.org/openpyxl/openpyxl/issues/1249/cannot-convert-my-type-to-excel
     'jinja2~=2.10',
     'pendulum~=2.0',
 ]
