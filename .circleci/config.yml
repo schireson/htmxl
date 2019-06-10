@@ -25,7 +25,7 @@ install_package: &install_package
     command: |
       python -m venv .venv
       source .venv/bin/activate
-      lucha aws whitelist -- pip install dist/schireson-excel-0.1.0.tar.gz[testing]
+      lucha aws whitelist -- pip install dist/schireson-excel-0.2.0.tar.gz[testing]
 
 install_package_docs: &install_package_docs
   run:
@@ -33,7 +33,7 @@ install_package_docs: &install_package_docs
     command: |
       python -m venv .venv
       source .venv/bin/activate
-      lucha aws whitelist -- pip install dist/schireson-excel-0.1.0.tar.gz[docs]
+      lucha aws whitelist -- pip install dist/schireson-excel-0.2.0.tar.gz[docs]
 
 ####################################################################################################
 #
@@ -87,8 +87,8 @@ jobs:
           root: dist
           # Must be relative path from root
           paths:
-            - schireson-excel-0.1.0.tar.gz
-            - schireson_excel-0.1.0-py3-none-any.whl
+            - schireson-excel-0.2.0.tar.gz
+            - schireson_excel-0.2.0-py3-none-any.whl
 
   test:
     docker:
