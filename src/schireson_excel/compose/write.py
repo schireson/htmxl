@@ -1,5 +1,6 @@
 """A module dedicated to writing data to a workbook."""
 import ast
+import datetime
 import functools
 import logging
 import string
@@ -9,6 +10,7 @@ import bs4
 import bs4.element
 import openpyxl.styles
 import pendulum
+
 import schireson_excel.compose.attributes
 from schireson_excel.compose.style import style_range
 
@@ -207,7 +209,7 @@ def write(element, writer, styler, style=None):
             write(value, writer, styler, style)
 
     else:
-        if isinstance(element, (str, int, float, bool, pendulum.DateTime, pendulum.Date)):
+        if isinstance(element, (str, int, float, bool, datetime.date)):
             write_value(element, writer, styler, style)
 
 
