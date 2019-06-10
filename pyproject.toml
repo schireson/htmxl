@@ -1,0 +1,5 @@
+[tool.black]
+line-length = 100
+
+[tool.lucha.linters.isort]
+known_first_party = 'schireson_excel'
