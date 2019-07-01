@@ -21,7 +21,7 @@ DOCS_REQUIRES = ["sphinx", "sphinx_rtd_theme"]
 
 setup(
     name="schireson-excel",
-    version="0.3.0",
+    version="0.4.0",
     packages=find_packages("src"),
     package_dir={"": "src"},
     install_requires=INSTALL_REQUIRES,
