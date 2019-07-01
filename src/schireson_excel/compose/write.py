@@ -23,6 +23,7 @@ BOTTOM_LEFT = "bottom-left"
 
 _type_map = {
     None: str,
+    "str": str,
     "int": int,
     "float": float,
     "date": lambda x: pendulum.parse(x).date(),
