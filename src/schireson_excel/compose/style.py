@@ -57,7 +57,7 @@ class Styler:
     def register_styles(self, styles):
         for style in styles:
             named_style = make_style(style)
-            logger.debug(f"Registering named style {named_style} in workbook {self.wb}")
+            logger.debug("Registering named style {} in workbook {}".format(named_style, self.wb))
             self.wb.add_named_style(named_style)
             self.named_styles[style["name"]] = named_style
 
