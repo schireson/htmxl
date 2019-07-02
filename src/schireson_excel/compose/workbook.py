@@ -31,11 +31,17 @@ class Workbook:
 
         return worksheet
 
-    def add_sheet_from_template_file(self, template_file, data):
+    def add_sheet_from_template_file(self, template_file, data=None):
+        if data is None:
+            data = {}
+
         with open(template_file, "r") as f:
             return self.add_sheet_from_template(template=f.read(), data=data)
 
-    def add_sheet_from_template(self, template, data):
+    def add_sheet_from_template(self, template, data=None):
+        if data is None:
+            data = {}
+
         worksheet = self.new_worksheet()
         worksheet.template = jinja_env.from_string(template)
         worksheet.data = data
@@ -79,7 +85,7 @@ class Worksheet:
         return self.template.render(self.data)
 
     def write(self):
-        sheet_name = self.soup.title.text
+        sheet_name = self.soup.title.text if self.soup.title else self.sheet_name
         logger.debug(
             "Updating sheet name from rendered template: {} -> {}".format(
                 self.sheet_name, sheet_name
