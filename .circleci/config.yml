@@ -25,7 +25,7 @@ install_package: &install_package
     command: |
       python -m venv .venv
       source .venv/bin/activate
-      lucha aws whitelist -- pip install dist/schireson-excel-0.4.0.tar.gz[testing]
+      lucha aws whitelist --profile artifactory -- pip install dist/schireson-excel-0.5.0.tar.gz[testing]
 
 install_package_docs: &install_package_docs
   run:
@@ -33,7 +33,7 @@ install_package_docs: &install_package_docs
     command: |
       python -m venv .venv
       source .venv/bin/activate
-      lucha aws whitelist -- pip install dist/schireson-excel-0.4.0.tar.gz[docs]
+      lucha aws whitelist --profile artifactory -- pip install dist/schireson-excel-0.5.0.tar.gz[docs]
 
 ####################################################################################################
 #
@@ -87,8 +87,8 @@ jobs:
           root: dist
           # Must be relative path from root
           paths:
-            - schireson-excel-0.4.0.tar.gz
-            - schireson_excel-0.4.0-py3-none-any.whl
+            - schireson-excel-0.5.0.tar.gz
+            - schireson_excel-0.5.0-py3-none-any.whl
 
   test:
     docker:
@@ -136,9 +136,9 @@ jobs:
           name: Build Docs
           command: |
             source .venv/bin/activate
-            sphinx-build docs/source docs/build
+            make -C docs html
       - store_artifacts:
-          path: docs/build
+          path: docs/_build
 
   publish:
     docker:
@@ -150,4 +150,6 @@ jobs:
       - <<: *configure_pip
       - run:
           name: Publish Python Distribution to Artifactory
-          command: lucha aws whitelist -- lucha cicd publish pypi --no-build
+          command: |
+            lucha aws whitelist -- lucha cicd publish pypi --no-build
+            lucha cicd publish docs --latest --profile ruby-docs --package schireson-excel
