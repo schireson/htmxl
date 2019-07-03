@@ -258,9 +258,18 @@ def return_cursor(strategy):
         @functools.wraps(fn)
         def wrapped(element, writer, styler, style):
             if strategy == BOTTOM_LEFT:
+                # Must be determined before we potentially change the location by `fn`.
                 column = writer.col
+                row = writer.row
+
                 result = fn(element, writer, styler, style)
-                writer.move_to(col=column, row=writer.row)
+                element, recording = result
+
+                if recording:
+                    _, bottom_right = calculate_bounding_cells(recording)
+                    row = bottom_right.row
+
+                writer.move_to(col=column, row=row)
                 writer.move_down()
 
             elif strategy == BOTTOM_RIGHT:
@@ -346,10 +355,12 @@ def write_th(element, writer, styler, style):
             write("", writer, styler, style)
 
     if len(recording) > 1:
-        if style:
+        if style or rowspan or colspan:
             merge_ref = get_bounding_ref(recording)
-            reference_style = styler.named_styles[style]
             writer.sheet.merge_cells(merge_ref)
+
+        if style:
+            reference_style = styler.named_styles[style]
             writer.style_range(reference_style, merge_ref)
 
     return element, recording
@@ -428,16 +439,20 @@ def _column_letters():
         multiplyer += 1
 
 
-def get_bounding_ref(cells):
+def calculate_bounding_cells(cells):
     min_row = min(cell.row for cell in cells)
     min_col = min(cell.col for cell in cells)
     max_row = max(cell.row for cell in cells)
     max_col = max(cell.col for cell in cells)
 
-    min_cell = Cell.from_location(row=min_row, col=min_col)
+    return (
+        Cell.from_location(row=min_row, col=min_col),
+        Cell.from_location(row=max_row, col=max_col),
+    )
 
-    max_cell = Cell.from_location(row=max_row, col=max_col)
 
+def get_bounding_ref(cells):
+    min_cell, max_cell = calculate_bounding_cells(cells)
     return "{}:{}".format(min_cell.ref, max_cell.ref)
 
 
