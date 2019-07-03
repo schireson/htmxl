@@ -62,6 +62,7 @@ workflows:
             - build
             - lint
             - test
+            - docs
           filters:
             branches:
               only:
@@ -84,11 +85,11 @@ jobs:
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
           # taken to be the root directory of the workspace.
-          root: dist
+          root: .
           # Must be relative path from root
           paths:
-            - schireson-excel-0.6.0.tar.gz
-            - schireson_excel-0.6.0-py3-none-any.whl
+            - dist/schireson-excel-0.6.0.tar.gz
+            - dist/schireson_excel-0.6.0-py3-none-any.whl
 
   test:
     docker:
@@ -96,7 +97,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: dist
+          at: .
       - <<: *authenticate-aws
       - <<: *configure_pip
       - <<: *install_package
@@ -112,7 +113,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: dist
+          at: .
       - <<: *authenticate-aws
       - <<: *configure_pip
       - <<: *install_package
@@ -128,7 +129,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: dist
+          at: .
       - <<: *authenticate-aws
       - <<: *configure_pip
       - <<: *install_package_docs
@@ -137,8 +138,10 @@ jobs:
           command: |
             source .venv/bin/activate
             make -C docs html
-      - store_artifacts:
-          path: docs/_build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - docs/_build/*
 
   publish:
     docker:
@@ -146,13 +149,11 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: dist
+          at: .
       - <<: *authenticate-aws
       - <<: *configure_pip
       - run:
           name: Publish Python Distribution to Artifactory
           command: |
             lucha aws whitelist --profile artifactory -- lucha cicd publish pypi --no-build
-
-            make -C docs html
             lucha cicd publish docs --latest --profile ruby-docs --package schireson-excel
