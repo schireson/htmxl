@@ -153,4 +153,6 @@ jobs:
           name: Publish Python Distribution to Artifactory
           command: |
             lucha aws whitelist --profile artifactory -- lucha cicd publish pypi --no-build
+
+            make -C docs html
             lucha cicd publish docs --latest --profile ruby-docs --package schireson-excel
