@@ -144,6 +144,7 @@ jobs:
     docker:
       - image: schireson/cicd-python
     steps:
+      - checkout
       - attach_workspace:
           at: dist
       - <<: *authenticate-aws
