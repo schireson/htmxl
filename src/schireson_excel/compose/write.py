@@ -59,12 +59,11 @@ class Writer:
             cell = Cell(ref)
             self._cells[ref] = cell
 
-    def write_cell(self, value, style=None):
-
+    def write_cell(self, value, styler, style=None):
         cell = self.sheet.cell(column=self.col, row=self.row, value=value)
 
         if style:
-            cell.style = style
+            cell.style = styler.calculate_style(style)
 
         if self._recordings:
             for recording in self._recordings.values():
@@ -306,7 +305,7 @@ def inline_styleable(fn):
 
 def write_value(element, writer, styler, style):
     logger.debug("Writing <value> at {}".format(writer.ref))
-    writer.write_cell(element, style)
+    writer.write_cell(element, styler, style)
 
 
 @return_cursor(TOP_RIGHT)
@@ -360,7 +359,7 @@ def write_th(element, writer, styler, style):
             writer.sheet.merge_cells(merge_ref)
 
         if style:
-            reference_style = styler.named_styles[style]
+            reference_style = styler.calculate_style(style)
             writer.style_range(reference_style, merge_ref)
 
     return element, recording
