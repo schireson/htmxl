@@ -5,6 +5,7 @@ import functools
 import logging
 import string
 from contextlib import contextmanager
+from math import floor
 
 import bs4
 import bs4.element
@@ -431,11 +432,16 @@ def write_span(element, writer, styler, style):
 
 
 def _column_letters():
-    multiplyer = 1
+    def _convert_number_to_letter(num):
+        if num >= 26:
+            return _convert_number_to_letter(floor(num / 26) - 1) + string.ascii_uppercase[num % 26]
+        else:
+            return string.ascii_uppercase[num]
+
+    itr = 0
     while True:
-        for letter in string.ascii_uppercase:
-            yield letter * multiplyer
-        multiplyer += 1
+        yield _convert_number_to_letter(itr)
+        itr += 1
 
 
 def calculate_bounding_cells(cells):
@@ -471,7 +477,7 @@ class _Alphabet:
         return self.letter_list.index(value)
 
     def __getitem__(self, item):
-        if len(self.letter_list) + 1 < item:
+        if len(self.letter_list) - 1 < item:
             for i in range(item - len(self.letter_list) + 1):
                 self.letter_list.append(next(self.column_letter_factory))
         return self.letter_list[item]
