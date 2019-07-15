@@ -340,7 +340,9 @@ def write_th(element, writer, styler, style):
     logger.debug("Writing <th> at {}".format(writer.ref))
     style = styler.get_style(element) or style
     with writer.record() as recording:
-        write(element.text.strip(), writer, styler, style)
+        data_type = _type_map[element.attrs.get("data-type")]
+        logger.debug("Setting cell {} to {}".format(writer.ref, data_type))
+        write(data_type(element.text.strip()), writer, styler, style)
 
         colspan = int(element.attrs.get("colspan", 1))
         rowspan = int(element.attrs.get("rowspan", 1))
@@ -355,13 +357,13 @@ def write_th(element, writer, styler, style):
             write("", writer, styler, style)
 
     if len(recording) > 1:
-        if style or rowspan or colspan:
+        if rowspan or colspan:
             merge_ref = get_bounding_ref(recording)
             writer.sheet.merge_cells(merge_ref)
-
-        if style:
-            reference_style = styler.calculate_style(style)
-            writer.style_range(reference_style, merge_ref)
+            if style:
+                style_name = styler.calculate_style(style)
+                reference_style = styler.named_styles[style_name]
+                writer.style_range(reference_style, merge_ref)
 
     return element, recording
 
