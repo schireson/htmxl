@@ -2,15 +2,14 @@ from setuptools import find_packages, setup
 
 INSTALL_REQUIRES = [
     "beautifulsoup4>=4.6",
-    "openpyxl==2.5",  # See https://bitbucket.org/openpyxl/openpyxl/issues/1249/cannot-convert-my-type-to-excel
+    "openpyxl>=2.5",
     "jinja2>=2.10",
     "pendulum>=1.0",
 ]
 
 TESTING_REQUIRES = [
-    "lucha",
     "pytest",
-    "pytest-cov",
+    "coverage",
     "isort",
     "black",
     "flake8",
@@ -21,7 +20,7 @@ DOCS_REQUIRES = ["sphinx", "sphinx_rtd_theme", "m2r"]
 
 setup(
     name="schireson-excel",
-    version="0.7.2",
+    version="0.7.3",
     packages=find_packages("src"),
     package_dir={"": "src"},
     install_requires=INSTALL_REQUIRES,
