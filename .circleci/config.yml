@@ -1,50 +1,50 @@
-version: 2
-####################################################################################################
-#
-# REUSABLE MAPPINGS
-#   especially steps used in multiple jobs) should be added here
-#
-####################################################################################################
-authenticate-aws: &authenticate-aws
-  run:
-    name: Enable aws authentication
-    command: |
-      aws configure set default.region "${AWS_DEFAULT_REGION:-us-east-1}"
-      printf "${AWS_CREDENTIALS}" > ~/.aws/credentials
+version: 2.1
 
-configure_pip: &configure_pip
-  run:
-    name: Configure Pip with artifactory
-    command: |
-      mkdir ~/.pip
-      echo -e "[global]\nindex-url = https://artifactory.schireson.com/artifactory/api/pypi/pypi/simple\ntrusted-host = artifactory.schireson.com" > ~/.pip/pip.conf
+executors:
+  main:
+    docker:
+      - image: schireson/cicd-python37
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASSWORD
 
-install_package: &install_package
-  run:
-    name: Install dependencies
-    command: |
-      python -m venv .venv
-      source .venv/bin/activate
-      lucha aws whitelist --profile artifactory -- pip install dist/schireson-excel-0.7.3.tar.gz[testing]
 
-install_package_docs: &install_package_docs
-  run:
-    name: Install dependencies
-    command: |
-      python -m venv .venv
-      source .venv/bin/activate
-      lucha aws whitelist --profile artifactory -- pip install dist/schireson-excel-0.7.3.tar.gz[docs]
+commands:
+  setup:
+    steps:
+      - checkout 
+      - run: |
+          mkdir ~/.pip
+          echo -e "[global]\nindex-url = https://artifactory.schireson.com/artifactory/api/pypi/pypi/simple\ntrusted-host = artifactory.schireson.com" > ~/.pip/pip.conf
 
-####################################################################################################
-#
-# WORKFLOWS:
-#
-#   build_test_publish:
-#     This workflow builds artifacts, runs the tests, and publishes a python package to artifactory
-#
-####################################################################################################
+  aws-create-credentials:
+    steps:
+      - run:
+          name: Create credentials file for AWS
+          command: |
+            aws configure set default.region "${AWS_DEFAULT_REGION:-us-east-1}"
+            printf "${AWS_CREDENTIALS}" > ~/.aws/credentials
+
+  install-package:
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            python -m venv .venv
+            source .venv/bin/activate
+            lucha aws whitelist --profile artifactory -- pip install dist/schireson-excel-0.7.3.tar.gz[testing]
+
+  install-package-docs:
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            python -m venv .venv
+            source .venv/bin/activate
+            lucha aws whitelist --profile artifactory -- pip install dist/schireson-excel-0.7.3.tar.gz[docs]
+
+
 workflows:
-  version: 2
   build_test_publish:
     jobs:
       - build
@@ -68,17 +68,11 @@ workflows:
               only:
                 - /^master$/
 
-####################################################################################################
-#
-# JOBS
-#
-####################################################################################################
 jobs:
   build:
-    docker:
-      - image: circleci/python:3.6.4
+    executor: main
     steps:
-      - checkout
+      - setup
       - run:
           name: Build package artifacts
           command: python setup.py sdist bdist_wheel
@@ -92,47 +86,41 @@ jobs:
             - dist/schireson_excel-0.7.3-py3-none-any.whl
 
   test:
-    docker:
-      - image: schireson/cicd-python
+    executor: main
     steps:
-      - checkout
+      - setup
       - attach_workspace:
           at: .
-      - <<: *authenticate-aws
-      - <<: *configure_pip
-      - <<: *install_package
+      - aws-create-credentials
+      - install-package
       - run:
           name: Unit Test
           command: |
             source .venv/bin/activate
-            lucha test
+            make test
 
   lint:
-    docker:
-      - image: schireson/cicd-python
+    executor: main
     steps:
-      - checkout
+      - setup
       - attach_workspace:
           at: .
-      - <<: *authenticate-aws
-      - <<: *configure_pip
-      - <<: *install_package
+      - aws-create-credentials
+      - install-package
       - run:
           name: Lint
           command: |
             source .venv/bin/activate
-            lucha lint
+            make lint
 
   docs:
-    docker:
-      - image: schireson/cicd-python
+    executor: main
     steps:
-      - checkout
+      - setup
       - attach_workspace:
           at: .
-      - <<: *authenticate-aws
-      - <<: *configure_pip
-      - <<: *install_package_docs
+      - aws-create-credentials
+      - install-package-docs
       - run:
           name: Build Docs
           command: |
@@ -144,14 +132,12 @@ jobs:
             - docs/_build/*
 
   publish:
-    docker:
-      - image: schireson/cicd-python
+    executor: main
     steps:
-      - checkout
+      - setup
       - attach_workspace:
           at: .
-      - <<: *authenticate-aws
-      - <<: *configure_pip
+      - aws-create-credentials
       - run:
           name: Publish Python Distribution to Artifactory
           command: |

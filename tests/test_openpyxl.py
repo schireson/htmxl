@@ -3,7 +3,7 @@ import pendulum
 
 
 def test_openpyxl_version():
-    """ Validate the installed version of openpyxl is compatible with pendulum.
+    """Validate the installed version of openpyxl is compatible with pendulum.
 
     This test just needs to pass to verify functionality.
     """
