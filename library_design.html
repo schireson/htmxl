@@ -1,0 +1,304 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Library Design &mdash; Schireson Excel 0.7.3 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="How To’s" href="how-tos/index.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Schireson Excel
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Library Design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#implementation-design">Implementation Design</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="how-tos/index.html">How To’s</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Schireson Excel</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Library Design</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/library_design.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="library-design">
+<h1>Library Design<a class="headerlink" href="#library-design" title="Permalink to this headline">¶</a></h1>
+<p>Key Ideas:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Custom composed excel documents require a markdown capability to design and update</p></li>
+<li><dl class="simple">
+<dt>HTML is an exceptional markdown languagge for this:</dt><dd><ul>
+<li><p>Native support for styling of blocks of content</p></li>
+<li><p>Commonly understood semantics for basic tags</p></li>
+<li><p>syntax for adding style and attributes to blocks</p></li>
+<li><p>Existing templating dialects</p></li>
+<li><p>Extremely good support for table design</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Templating languages exist to dynamically generate HTML from data</p></li>
+</ul>
+</div></blockquote>
+<p>Libraries being used:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>openpyxl</dt><dd><ul>
+<li><p>Reads and writes excel files</p></li>
+<li><p>Applies built in styles</p></li>
+<li><p>Provides low and medium level APIs for doing excel manipulation</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>beautifulsoup4</dt><dd><ul>
+<li><p>Parse raw HTML and provides iterables for writing out cells in excel</p></li>
+<li><p>Provides access to tag level attribute and style notions</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Jinja2</dt><dd><ul>
+<li><p>Provides good python support for in-template flow control and variable access and templating</p></li>
+<li><p>Could be replaced by any templating engine. It is only used to create raw HTML.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<div class="section" id="implementation-design">
+<h2>Implementation Design<a class="headerlink" href="#implementation-design" title="Permalink to this headline">¶</a></h2>
+<p>This information is not necessary to use this library, but might help contribution, and reduction of “magic”.</p>
+<p>The writing implementation is built on few concepts:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>A “cursor” or “write head” concept, implemenated in part by <code class="xref py py-class docutils literal notranslate"><span class="pre">schireson_excel.compose.write.Writer</span></code>.</dt><dd><ul>
+<li><p>This cursor moves around a sheet, writing data and applying styles, etc.</p></li>
+<li><dl class="simple">
+<dt>This cursor keeps “recordings” of where it has been within the context of writing a “tag”.</dt><dd><ul>
+<li><p>This permits nested tags each applying/overriding styles from their parents</p></li>
+<li><p>This also allows for the implementation of cell merging</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>A <a href="#id1"><span class="problematic" id="id2">:function:`schireson_excel.compose.write.write`</span></a> function</dt><dd><ul>
+<li><p>Knowns how to interpret each HTML tag, or delegates to a specific tag implementation function</p></li>
+<li><p>Is a recursive function, allowing deeply nested tags</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Tag specific implementation functions</dt><dd><ul>
+<li><p>Specify where the cursor should end up after the tag is finished being written.</p></li>
+<li><p>Typically calls the generic <a href="#id3"><span class="problematic" id="id4">:function:`schireson_excel.compose.write.write`</span></a> function on all its child elements.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>A mix of supported inline styles and single class based styling. While the underlying excel library supports “adding” styles together, the current implementation only permits one class per element.</p></li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="how-tos/index.html" class="btn btn-neutral float-right" title="How To’s" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, Schireson Associates, LLC.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
