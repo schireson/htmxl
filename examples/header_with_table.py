@@ -1,7 +1,7 @@
 import datetime
 import textwrap
 
-from schireson_excel.compose import Workbook, Worksheet
+from htmxl.compose import Workbook, Worksheet
 
 template = textwrap.dedent(
     """\

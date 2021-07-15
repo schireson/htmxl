@@ -1,28 +1,28 @@
 API
 ===
 
-schireson_excel
----------------
+htmxl
+-----
 
 compose
 +++++++
 
 workbook
 ________
-.. automodule:: schireson_excel.compose.workbook
+.. automodule:: htmxl.compose.workbook
 
 write
 _____
-.. automodule:: schireson_excel.compose.write
+.. automodule:: htmxl.compose.write
 
 style
 _____
-.. automodule:: schireson_excel.compose.style
+.. automodule:: htmxl.compose.style
 
 constants
 _________
-.. automodule:: schireson_excel.compose.constants
+.. automodule:: htmxl.compose.constants
 
 attributes
 __________
-.. automodule:: schireson_excel.compose.attributes
+.. automodule:: htmxl.compose.attributes

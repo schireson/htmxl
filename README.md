@@ -1,23 +1,114 @@
-## Schireson Excel
+# HTM(x)L
 
-[Docs!](http://docs.schireson.com/packages/schireson-excel/latest/)
+![CircleCI](https://img.shields.io/circleci/build/gh/schireson/htmxl/master)
+[![codecov](https://codecov.io/gh/schireson/htmxl/branch/master/graph/badge.svg)](https://codecov.io/gh/schireson/htmxl)
+[![Documentation
+Status](https://readthedocs.org/projects/htmxl/badge/?version=latest)](https://htmxl.readthedocs.io/en/latest/?badge=latest)
 
-### Hello World
+## Introduction
 
+``` python
+from htmxl.compose import Workbook
 
-    from schireson_excel.compose import Workbook
+workbook = Workbook()
+workbook.add_sheet_from_template(
+    template="""
+    <head>{{ title }}</head>
+    <body>
+      <div>
+        Hello down there, {{ name }}!
+      </div>
+      <div>
+        <table>
+          <thead>
+            <tr>
+              {% for column_name in column_names %}
+                <th>{{ column_name }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td>{{ row.a }}</td>
+                <td>{{ row.b }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table
+      </div>
+    </body>
+    """,
+    data={
+        title="Hello World",
+        name='Bob',
+        column_names=['A', 'B'],
+        rows=[{'a': 'a', 'b': 2}, {'a': 'b', 'b': 2}, {'a': 'c', 'b': 3}],
+    }
 
-    workbook = Workbook()
-    workbook.add_sheet_from_template(
-        template="""<head>{{ title }}</head>  # This defines the worksheet name
-        <body><div>Hello down there, {{ bottom_name }}!</div><br><div>Hello up there, {{ top_name }}!</div>
-        """,
-        data={
-            title="Hello World",
-            top_name='two rows up',
-            bottom_name='two rows down',
-        }
+)
 
-    )
+workbook.compose('hello_world.xlsx')
+```
 
-    workbook.compose('hello_world.xlsx')
+![example](./docs/_static/readme.md)
+
+## The Pitch
+
+Essentially, HTM(x)L is an attempt to allow the declaration of Excel files in a (mostly) declarative
+manner that separates the format that the document should take from the data being added to it.
+
+The "normal" manner of producing Excel files essentially amounts to a series of imperitive
+statements about what cells to modify to get the excel file you want. For any file of moderate
+complexity, this leads to there being very little intuition about what the resulting Excel file will
+actually look like.
+
+Particularly once you start adding cell styling, or finding yourself inserting dynamically-sized
+data (requiring a bunch of cell offset math), the relative ease of designing and visualizing the
+template using a familiar idiom, HTML, can be make it much much easier to author and maintain these
+kinds of templates.
+
+## Features
+
+General features include:
+
+- HTML elements as metaphors for structures in the resulting Excel document
+
+  Due to the obviously grid-oriented structure of Excel, the metaphors **can** sometimes be
+  approximate, but should hopefully make intuitive sense!
+
+  For example:
+
+  - `<span>`: An inline-block element which pushes elements after it to the right
+  - `<div>`: An block element which push elements after it downward
+  - `<table>`: Self-explanatory!
+
+  See the documentation about
+  [elements](https://pytest-mock-resources.readthedocs.io/en/latest/elements.html) for more details
+
+- Styling
+
+  Some commonly/obviously useful and style options like width/height (`style="width: 50px"`) or
+  rowspan/colspan `colspan="2"` have been implemented, but there's no reason that various different
+  options that make intuitive sense (like colors) could be implemented also
+
+  See the documentation about
+  [styling](https://pytest-mock-resources.readthedocs.io/en/latest/styling.html) for more details
+
+- Classes
+
+  While inline color styles are not (yet) implemented, one can supply classes normally,
+  `class="class1 class2"` and supply the definitions for those classes as inputs to the Workbook
+
+  ``` python
+  styles = [
+      {"name": "odd", "pattern_fill": {"patternType": "solid", "fgColor": "FBEAFB"}},
+  ]
+  Workbook(styles=styles)
+  ```
+
+## Installing
+
+``` bash
+pip install htmxl
+```

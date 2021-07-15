@@ -1,6 +1,6 @@
 import pytest
 
-from schireson_excel.compose.write import _column_letters
+from htmxl.compose.write import _column_letters
 
 
 @pytest.mark.this

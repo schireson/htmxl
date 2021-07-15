@@ -16,11 +16,11 @@ TESTING_REQUIRES = [
     "pydocstyle",
 ]
 
-DOCS_REQUIRES = ["sphinx", "sphinx_rtd_theme", "m2r"]
+DOCS_REQUIRES = ["sphinx", "sphinx_rtd_theme", "m2r2"]
 
 setup(
-    name="schireson-excel",
-    version="0.7.3",
+    name="htmxl",
+    version="0.8.0",
     packages=find_packages("src"),
     package_dir={"": "src"},
     install_requires=INSTALL_REQUIRES,

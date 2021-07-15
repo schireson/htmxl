@@ -100,7 +100,7 @@ set, for the current version of your library you can run:
 
 .. code-block:: python
 
-   >>> from schireson_excel.compose.style import default_styles
+   >>> from htmxl.compose.style import default_styles
    >>> print([style['name'] for style in default_styles])
    ['xl-centered', 'xl-underlined']
 
@@ -130,7 +130,7 @@ Define custom styles
 
 .. code-block:: python
 
-   from schireson_excel.compose import Workbook
+   from htmxl.compose import Workbook
 
    template = """
        <body>
