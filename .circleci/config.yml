@@ -13,7 +13,7 @@ commands:
           command: |
             python -m venv .venv
             source .venv/bin/activate
-            pip install dist/htmxl-0.8.0.tar.gz[testing]
+            poetry install
 
   install-package-docs:
     steps:
@@ -22,7 +22,17 @@ commands:
           command: |
             python -m venv .venv
             source .venv/bin/activate
-            pip install dist/htmxl-0.8.0.tar.gz[docs]
+            poetry install 
+            pip install -r docs/requirements.txt
+
+  setup-poetry:
+    steps:
+      - run:
+          name: Install poetry
+          command: |
+            curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
+            echo 'export PATH="$HOME/.poetry/bin:$PATH"' >> $BASH_ENV
+
 
 
 workflows:
@@ -44,9 +54,10 @@ jobs:
     executor: main
     steps:
       - checkout 
+      - setup-poetry
       - run:
           name: Build package artifacts
-          command: python setup.py sdist bdist_wheel
+          command: poetry build
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
           # taken to be the root directory of the workspace.
