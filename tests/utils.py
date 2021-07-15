@@ -2,8 +2,8 @@ import os
 
 import openpyxl
 
-from schireson_excel.compose import Workbook
-from schireson_excel.compose.compat import BytesIO
+from htmxl.compose import Workbook
+from htmxl.compose.compat import BytesIO
 
 
 class WriteTests:

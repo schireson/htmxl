@@ -3,7 +3,7 @@ line-length = 100
 
 [tool.isort]
 profile = 'black'
-known_first_party = 'schireson_excel,tests'
+known_first_party = 'htmxl,tests'
 line_length = 100
 float_to_top=true
 order_by_type = false

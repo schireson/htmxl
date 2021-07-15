@@ -12,8 +12,8 @@ import bs4.element
 import openpyxl.styles
 import pendulum
 
-import schireson_excel.compose.attributes
-from schireson_excel.compose.style import style_range
+import htmxl.compose.attributes
+from htmxl.compose.style import style_range
 
 logger = logging.getLogger(__name__)
 
@@ -373,7 +373,7 @@ def write_th(element, writer, styler, style):
 def write_table(element, writer, styler, style):
     logger.debug("Writing <table> at {}".format(writer.ref))
     style = styler.get_style(element) or style
-    autofilter = element.get(schireson_excel.compose.attributes.DATA_AUTOFILTER, "false")
+    autofilter = element.get(htmxl.compose.attributes.DATA_AUTOFILTER, "false")
 
     with writer.record() as recording:
         for sub_component in element:

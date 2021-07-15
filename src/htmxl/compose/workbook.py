@@ -7,8 +7,8 @@ import bs4
 import jinja2
 import openpyxl
 
-from schireson_excel.compose.style import Styler
-from schireson_excel.compose.write import write, Writer
+from htmxl.compose.style import Styler
+from htmxl.compose.write import write, Writer
 
 logger = logging.getLogger(__name__)
 
