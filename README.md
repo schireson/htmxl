@@ -39,13 +39,12 @@ workbook.add_sheet_from_template(
       </div>
     </body>
     """,
-    data={
+    data=dict(
         title="Hello World",
         name='Bob',
         column_names=['A', 'B'],
         rows=[{'a': 'a', 'b': 2}, {'a': 'b', 'b': 2}, {'a': 'c', 'b': 3}],
-    }
-
+    )
 )
 
 workbook.compose('hello_world.xlsx')

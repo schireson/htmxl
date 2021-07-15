@@ -3,28 +3,9 @@ version: 2.1
 executors:
   main:
     docker:
-      - image: schireson/cicd-python37
-        auth:
-          username: $DOCKER_USER
-          password: $DOCKER_PASSWORD
-
+      - image: cimg/python:3.7
 
 commands:
-  setup:
-    steps:
-      - checkout 
-      - run: |
-          mkdir ~/.pip
-          echo -e "[global]\nindex-url = https://artifactory.schireson.com/artifactory/api/pypi/pypi/simple\ntrusted-host = artifactory.schireson.com" > ~/.pip/pip.conf
-
-  aws-create-credentials:
-    steps:
-      - run:
-          name: Create credentials file for AWS
-          command: |
-            aws configure set default.region "${AWS_DEFAULT_REGION:-us-east-1}"
-            printf "${AWS_CREDENTIALS}" > ~/.aws/credentials
-
   install-package:
     steps:
       - run:
@@ -32,7 +13,7 @@ commands:
           command: |
             python -m venv .venv
             source .venv/bin/activate
-            lucha aws whitelist --profile artifactory -- pip install dist/schireson-excel-0.7.3.tar.gz[testing]
+            pip install dist/htmxl-0.8.0.tar.gz[testing]
 
   install-package-docs:
     steps:
@@ -41,11 +22,11 @@ commands:
           command: |
             python -m venv .venv
             source .venv/bin/activate
-            lucha aws whitelist --profile artifactory -- pip install dist/schireson-excel-0.7.3.tar.gz[docs]
+            pip install dist/htmxl-0.8.0.tar.gz[docs]
 
 
 workflows:
-  build_test_publish:
+  build_test:
     jobs:
       - build
       - lint:
@@ -57,22 +38,12 @@ workflows:
       - docs:
           requires:
               - build
-      - publish:
-          requires:
-            - build
-            - lint
-            - test
-            - docs
-          filters:
-            branches:
-              only:
-                - /^master$/
 
 jobs:
   build:
     executor: main
     steps:
-      - setup
+      - checkout 
       - run:
           name: Build package artifacts
           command: python setup.py sdist bdist_wheel
@@ -82,16 +53,15 @@ jobs:
           root: .
           # Must be relative path from root
           paths:
-            - dist/schireson-excel-0.7.3.tar.gz
-            - dist/schireson_excel-0.7.3-py3-none-any.whl
+            - dist/htmxl-0.8.0.tar.gz
+            - dist/htmxl-0.8.0-py3-none-any.whl
 
   test:
     executor: main
     steps:
-      - setup
+      - checkout 
       - attach_workspace:
           at: .
-      - aws-create-credentials
       - install-package
       - run:
           name: Unit Test
@@ -102,10 +72,9 @@ jobs:
   lint:
     executor: main
     steps:
-      - setup
+      - checkout 
       - attach_workspace:
           at: .
-      - aws-create-credentials
       - install-package
       - run:
           name: Lint
@@ -116,10 +85,9 @@ jobs:
   docs:
     executor: main
     steps:
-      - setup
+      - checkout 
       - attach_workspace:
           at: .
-      - aws-create-credentials
       - install-package-docs
       - run:
           name: Build Docs
@@ -130,16 +98,3 @@ jobs:
           root: .
           paths:
             - docs/_build/*
-
-  publish:
-    executor: main
-    steps:
-      - setup
-      - attach_workspace:
-          at: .
-      - aws-create-credentials
-      - run:
-          name: Publish Python Distribution to Artifactory
-          command: |
-            lucha aws whitelist --profile artifactory -- lucha cicd publish pypi --no-build
-            lucha cicd publish docs --latest --profile ruby-docs --package schireson-excel

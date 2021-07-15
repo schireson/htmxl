@@ -16,7 +16,7 @@ TESTING_REQUIRES = [
     "pydocstyle",
 ]
 
-DOCS_REQUIRES = ["sphinx", "sphinx_rtd_theme", "m2r2"]
+DOCS_REQUIRES = ["sphinx", "sphinx_rtd_theme", "m2r2", "sphinx_autodoc_typehints"]
 
 setup(
     name="htmxl",
