@@ -7,8 +7,7 @@ import string
 from contextlib import contextmanager
 from math import floor
 
-import bs4
-import bs4.element
+import lxml
 import openpyxl.styles
 import pendulum
 
@@ -37,7 +36,6 @@ class Writer:
     def __init__(self, sheet, ref="A1"):
         self.current_cell = Cell(ref)
         self.sheet = sheet
-        self._cells = {self.current_cell.ref: self.current_cell}
         self._recordings = {}
 
         self._auto_filter_set = False
@@ -55,10 +53,7 @@ class Writer:
         return self.current_cell.ref
 
     def get_cell(self, ref):
-        cell = self._cells.get(ref)
-        if cell is None:
-            cell = Cell(ref)
-            self._cells[ref] = cell
+        return self.sheet.cell(column=ref.col, row=ref.row)
 
     def write_cell(self, value, styler, style=None):
         cell = self.sheet.cell(column=self.col, row=self.row, value=value)
@@ -164,54 +159,83 @@ class Writer:
 
 
 def write(element, writer, styler, style=None):
-    if type(element) == bs4.BeautifulSoup:
-        logger.debug("Writing < body > at {}".format(writer.ref))
-        for item in element.body:
-            write(item, writer, styler)
+    if isinstance(element, lxml.etree._Element):
+        if element.text:
+            value = element.text.strip()
+            write_value(value, writer, styler, style)
 
-    if type(element) == bs4.element.Tag:
+        tag = element.tag
+        if tag in {"root", "html", "body"}:
+            logger.debug("Writing < body > at {}".format(writer.ref))
+            for item in element.iterchildren():
+                write(item, writer, styler)
 
-        if element.name == "div":
+        elif tag == "head":
+            write_head(element, writer)
+
+        elif tag == "div":
             write_div(element, writer, styler, style)
 
-        if element.name == "span":
+        elif tag == "span":
             write_span(element, writer, styler, style)
 
-        elif element.name == "br":
+        elif tag == "br":
             logger.debug("Writing <br> at {}".format(writer.ref))
             row = writer.row
             col = writer.col
-            write("", writer, styler, style)
-            writer.move_to(col=col, row=row)
-            writer.move_down()
+            value = writer.get_cell(writer.current_cell).value
+            if value:
+                writer.move_down()
+                writer.move_down()
+            else:
+                write("", writer, styler, style)
+                writer.move_to(col=col, row=row)
+                writer.move_down()
 
-        elif element.name == "table":
+        elif tag == "table":
             write_table(element, writer, styler, style)
 
-        elif element.name == "tr":
+        elif tag == "tr":
             write_tr(element, writer, styler, style)
 
-        elif element.name == "th":
+        elif tag == "th":
             write_th(element, writer, styler, style)
 
-        elif element.name == "td":
+        elif tag == "td":
             write_td(element, writer, styler, style)
 
-        elif element.name == "thead":
+        elif tag == "thead":
             write_thead(element, writer, styler, style)
 
-        elif element.name == "tbody":
+        elif tag == "tbody":
             write_tbody(element, writer, styler, style)
 
-    elif type(element) == bs4.element.NavigableString:
-        logger.debug("Writing navigable string at {}".format(writer.ref))
-        value = element.strip()
-        if value:
-            write(value, writer, styler, style)
+        else:
+            raise RuntimeError(f"Encountered unhandled or unimplemented tag {tag}.")
 
+        if element.tail:
+            value = element.tail.strip()
+            write_value(value, writer, styler, style)
     else:
         if isinstance(element, (str, int, float, bool, datetime.date)):
             write_value(element, writer, styler, style)
+        else:
+            raise RuntimeError(f"Encountered unhandled or unimplemented content {element}.")
+
+
+def write_head(element, writer):
+    tag = element.tag
+    if tag == "head":
+        if element.text:
+            writer.sheet.title = element.text
+
+        for item in element.iterchildren():
+            write_head(item, writer)
+
+    elif tag == "title":
+        writer.sheet.title = element.text
+    else:
+        raise RuntimeError(f"Encountered unhandled or unimplemented tag {tag}.")
 
 
 class Cell:
@@ -315,7 +339,7 @@ def write_td(element, writer, styler, style):
     logger.debug("Writing <td> at {}".format(writer.ref))
     style = styler.get_style(element) or style
     with writer.record() as recording:
-        data_type = _type_map[element.attrs.get("data-type")]
+        data_type = _type_map[element.attrib.get("data-type")]
         logger.debug("Setting cell {} to {}".format(writer.ref, data_type))
         write(data_type(element.text.strip()), writer, styler, style)
 
@@ -340,12 +364,12 @@ def write_th(element, writer, styler, style):
     logger.debug("Writing <th> at {}".format(writer.ref))
     style = styler.get_style(element) or style
     with writer.record() as recording:
-        data_type = _type_map[element.attrs.get("data-type")]
+        data_type = _type_map[element.attrib.get("data-type")]
         logger.debug("Setting cell {} to {}".format(writer.ref, data_type))
         write(data_type(element.text.strip()), writer, styler, style)
 
-        colspan = int(element.attrs.get("colspan", 1))
-        rowspan = int(element.attrs.get("rowspan", 1))
+        colspan = int(element.attrib.get("colspan", 1))
+        rowspan = int(element.attrib.get("rowspan", 1))
 
         # If we want this cell to span more than one row or column
         # we can traverse to the maximum row and column and write some blank data.

@@ -8,7 +8,7 @@ authors = [
     "Luke Mino-Altherr  <lminoaltherr@gmail.com>",
 ]
 license = "MIT"
-keywords = [ "excel", "openpyxl", "jinja", "html", "beautifulsoup", "template" ]
+keywords = [ "excel", "openpyxl", "jinja", "html", "template" ]
 repository = "https://github.com/schireson/htmxl"
 packages = [
     { include = "htmxl", from = "src" },
@@ -21,7 +21,7 @@ include = [
 [tool.poetry.dependencies]
 python = ">=3.6, <4"
 
-beautifulsoup4 = {version = ">= 4.6"}
+lxml = {version = ">= 4.6"}
 openpyxl = {version = ">=2.5"}
 jinja2 = {version = ">=2.10"}
 pendulum = {version = ">=1.0"}

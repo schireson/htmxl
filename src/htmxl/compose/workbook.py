@@ -3,9 +3,9 @@
 import logging
 import uuid
 
-import bs4
 import jinja2
 import openpyxl
+from lxml import etree
 
 from htmxl.compose.style import Styler
 from htmxl.compose.write import write, Writer
@@ -75,23 +75,18 @@ class Worksheet:
         return self.writer.sheet
 
     @property
-    def soup(self):
-        logger.debug("Making soup for sheet <{}>".format(self.sheet_name))
-        return bs4.BeautifulSoup(self.rendered, features="html.parser")
+    def tree(self):
+        logger.debug(
+            "Parsing the template into a tree of nodes for sheet <{}>".format(self.sheet_name)
+        )
+        parser = etree.XMLParser(remove_blank_text=True)
+        return etree.XML(self.rendered, parser)
 
     @property
     def rendered(self):
         logger.debug("Rendering sheet <{}>".format(self.sheet_name))
-        return self.template.render(self.data)
+        return f"<root>{self.template.render(self.data)}</root>"
 
     def write(self):
-        sheet_name = self.soup.title.text if self.soup.title else self.sheet_name
-        logger.debug(
-            "Updating sheet name from rendered template: {} -> {}".format(
-                self.sheet_name, sheet_name
-            )
-        )
-        self.sheet_name = sheet_name
-        self.writer.sheet.title = self.sheet_name
         logger.debug("Writing sheet <{}>".format(self.sheet_name))
-        write(element=self.soup, writer=self.writer, styler=self.styler)
+        write(element=self.tree, writer=self.writer, styler=self.styler)

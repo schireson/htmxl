@@ -42,7 +42,7 @@ class Styler:
         inline_style = {}
         raw_inline_style = element.get("style", None)
         data_attributes = {
-            attr: value for attr, value in element.attrs.items() if attr.startswith("data-")
+            attr: value for attr, value in element.attrib.items() if attr.startswith("data-")
         }
         inline_style.update(data_attributes)
         if raw_inline_style is None:
