@@ -1,6 +1,7 @@
 import os
 
 import openpyxl
+import pytest
 
 from htmxl.compose import Workbook
 from htmxl.compose.compat import BytesIO
@@ -14,22 +15,18 @@ class WriteTests:
     def load_result(self):
         return openpyxl.load_workbook(os.path.join(self.fixture_dir, self.expected_result_file))
 
-    def load_source(self):
+    def load_source(self, parser):
         template_file = os.path.join(self.fixture_dir, self.template_file)
-        wb = Workbook()
+        wb = Workbook(parser=parser)
         wb.add_sheet_from_template_file(template_file)
         fileobj = BytesIO()
         wb.compose(fileobj)
         fileobj.seek(0)
         return openpyxl.load_workbook(fileobj)
 
-    def test_sheets_num(self):
-        result = self.load_source()
-        expected_result = self.load_result()
-        assert len(result.worksheets) == len(expected_result.worksheets)
-
-    def test_equality(self):
-        result = self.load_source()
+    @pytest.mark.parametrize("parser", ["beautifulsoup", "lxml"])
+    def test_equality(self, parser):
+        result = self.load_source(parser)
         expected_result = self.load_result()
 
         result_worksheet = list(result.worksheets[0].rows)

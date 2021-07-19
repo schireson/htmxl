@@ -108,6 +108,32 @@ General features include:
 
 ## Installing
 
+There is no default parser (for HTML) included with a default installation of the package. We do
+this for both backwards compatibility and future compatibility reasons.
+
+In order to keep the base package lean when one opts to use one or the other parser, we include a
+set of bundled parser-adaptor implementations for known supported parser libraries
+
+To opt into the installation of the dependent library for the parser you chose:
+
 ``` bash
-pip install htmxl
+# Slower, but more permissive
+pip install htmxl[beautifulsoup]
+
+# Faster, but more strict
+pip install htmxl[lxml]
+```
+
+By default, the package will detect installed parser libraries and choose the first one we find, so
+a vanilla `Workbook()` instantiation should Just Work.
+
+However, we encourage users to explicitly select their parser to avoid inadvertant selection of the
+"wrong" parser at runtime (given that they have [template compatibility
+issues](https://pytest-mock-resources.readthedocs.io/en/latest/compatbility.html))
+
+``` python
+from htmxl.compose import Workbook
+
+workbook = Workbook(parser='beautifulsoup')
+workbook = Workbook(parser='lxml')
 ```

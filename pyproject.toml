@@ -21,10 +21,17 @@ include = [
 [tool.poetry.dependencies]
 python = ">=3.6, <4"
 
-lxml = {version = ">= 4.6"}
+typing_extensions = {version = "*", python = "<3.8"}
 openpyxl = {version = ">=2.5"}
 jinja2 = {version = ">=2.10"}
 pendulum = {version = ">=1.0"}
+
+lxml = {version = ">= 4.6", optional = true}
+beautifulsoup4 = {version = ">= 4.6", optional = true}
+
+[tool.poetry.extras]
+beautifulsoup = ["beautifulsoup4"]
+lxml = ["lxml"]
 
 [tool.poetry.dev-dependencies]
 black = {version = "=>19.10b0", allow-prereleases = true}

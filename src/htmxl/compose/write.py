@@ -7,12 +7,12 @@ import string
 from contextlib import contextmanager
 from math import floor
 
-import lxml
 import openpyxl.styles
 import pendulum
 
 import htmxl.compose.attributes
 from htmxl.compose.style import style_range
+from htmxl.token import TokenStream
 
 logger = logging.getLogger(__name__)
 
@@ -159,15 +159,11 @@ class Writer:
 
 
 def write(element, writer, styler, style=None):
-    if isinstance(element, lxml.etree._Element):
-        if element.text:
-            value = element.text.strip()
-            write_value(value, writer, styler, style)
-
-        tag = element.tag
+    if isinstance(element, TokenStream):
+        tag = element.name
         if tag in {"root", "html", "body"}:
             logger.debug("Writing < body > at {}".format(writer.ref))
-            for item in element.iterchildren():
+            for item in element.content():
                 write(item, writer, styler)
 
         elif tag == "head":
@@ -188,7 +184,7 @@ def write(element, writer, styler, style=None):
                 writer.move_down()
                 writer.move_down()
             else:
-                write("", writer, styler, style)
+                write_value("", writer, styler, style)
                 writer.move_to(col=col, row=row)
                 writer.move_down()
 
@@ -213,9 +209,6 @@ def write(element, writer, styler, style=None):
         else:
             raise RuntimeError(f"Encountered unhandled or unimplemented tag {tag}.")
 
-        if element.tail:
-            value = element.tail.strip()
-            write_value(value, writer, styler, style)
     else:
         if isinstance(element, (str, int, float, bool, datetime.date)):
             write_value(element, writer, styler, style)
@@ -224,18 +217,15 @@ def write(element, writer, styler, style=None):
 
 
 def write_head(element, writer):
-    tag = element.tag
-    if tag == "head":
-        if element.text:
-            writer.sheet.title = element.text
-
-        for item in element.iterchildren():
-            write_head(item, writer)
-
-    elif tag == "title":
-        writer.sheet.title = element.text
+    if isinstance(element, TokenStream):
+        tag = element.name
+        if tag in {"head", "title"}:
+            for item in element.content():
+                write_head(item, writer)
+        else:
+            raise RuntimeError(f"Encountered unhandled or unimplemented tag {tag}.")
     else:
-        raise RuntimeError(f"Encountered unhandled or unimplemented tag {tag}.")
+        writer.sheet.title = element
 
 
 class Cell:
@@ -339,9 +329,9 @@ def write_td(element, writer, styler, style):
     logger.debug("Writing <td> at {}".format(writer.ref))
     style = styler.get_style(element) or style
     with writer.record() as recording:
-        data_type = _type_map[element.attrib.get("data-type")]
+        data_type = _type_map[element.attrs.get("data-type")]
         logger.debug("Setting cell {} to {}".format(writer.ref, data_type))
-        write(data_type(element.text.strip()), writer, styler, style)
+        write_value(data_type(element.text.strip()), writer, styler, style)
 
     return element, recording
 
@@ -352,7 +342,7 @@ def write_tr(element, writer, styler, style):
     logger.debug("Writing <tr> at {}".format(writer.ref))
     style = styler.get_style(element) or style
     with writer.record() as recording:
-        for td in element:
+        for td in element.content():
             write(td, writer, styler, style)
 
     return element, recording
@@ -364,12 +354,12 @@ def write_th(element, writer, styler, style):
     logger.debug("Writing <th> at {}".format(writer.ref))
     style = styler.get_style(element) or style
     with writer.record() as recording:
-        data_type = _type_map[element.attrib.get("data-type")]
+        data_type = _type_map[element.attrs.get("data-type")]
         logger.debug("Setting cell {} to {}".format(writer.ref, data_type))
-        write(data_type(element.text.strip()), writer, styler, style)
+        write_value(data_type(element.text.strip()), writer, styler, style)
 
-        colspan = int(element.attrib.get("colspan", 1))
-        rowspan = int(element.attrib.get("rowspan", 1))
+        colspan = int(element.attrs.get("colspan", 1))
+        rowspan = int(element.attrs.get("rowspan", 1))
 
         # If we want this cell to span more than one row or column
         # we can traverse to the maximum row and column and write some blank data.
@@ -378,7 +368,7 @@ def write_th(element, writer, styler, style):
         if rowspan > 1 or colspan > 1:
             writer.move_right(colspan - 1)
             writer.move_down(rowspan - 1)
-            write("", writer, styler, style)
+            write_value("", writer, styler, style)
 
     if len(recording) > 1:
         if rowspan or colspan:
@@ -400,7 +390,7 @@ def write_table(element, writer, styler, style):
     autofilter = element.get(htmxl.compose.attributes.DATA_AUTOFILTER, "false")
 
     with writer.record() as recording:
-        for sub_component in element:
+        for sub_component in element.content():
             write(sub_component, writer, styler, style)
 
     if autofilter == "true":
@@ -415,7 +405,7 @@ def write_thead(element, writer, styler, style):
     logger.debug("Writing <thead> at {}".format(writer.ref))
     style = styler.get_style(element) or style
     with writer.record() as recording:
-        for sub_component in element:
+        for sub_component in element.content():
             write(sub_component, writer, styler, style)
 
     return element, recording
@@ -426,7 +416,7 @@ def write_tbody(element, writer, styler, style):
     logger.debug("Writing <tbody> at {}".format(writer.ref))
     style = styler.get_style(element) or style
     with writer.record() as recording:
-        for sub_component in element:
+        for sub_component in element.content():
             write(sub_component, writer, styler, style)
 
     return element, recording
@@ -439,7 +429,7 @@ def write_div(element, writer, styler, style):
     style = styler.get_style(element) or style
 
     with writer.record() as recording:
-        for item in element:
+        for item in element.content():
             write(item, writer, styler, style)
 
     return element, recording
@@ -450,7 +440,7 @@ def write_div(element, writer, styler, style):
 def write_span(element, writer, styler, style):
     logger.debug("Writing <span> at {}".format(writer.ref))
     with writer.record() as recording:
-        for item in element:
+        for item in element.content():
             style = styler.get_style(element) or style
             write(item, writer, styler, style)
 
