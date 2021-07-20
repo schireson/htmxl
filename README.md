@@ -1,9 +1,6 @@
-# HTM(x)L
-
 ![CircleCI](https://img.shields.io/circleci/build/gh/schireson/htmxl/master)
 [![codecov](https://codecov.io/gh/schireson/htmxl/branch/master/graph/badge.svg)](https://codecov.io/gh/schireson/htmxl)
-[![Documentation
-Status](https://readthedocs.org/projects/htmxl/badge/?version=latest)](https://htmxl.readthedocs.io/en/latest/?badge=latest)
+[![Documentation](https://readthedocs.org/projects/htmxl/badge/?version=latest)](https://htmxl.readthedocs.io/en/latest/?badge=latest)
 
 ## Introduction
 
@@ -50,7 +47,7 @@ workbook.add_sheet_from_template(
 workbook.compose('hello_world.xlsx')
 ```
 
-![example](./docs/_static/readme.md)
+![example](https://github.com/schireson/htmxl/blob/main/docs/_static/readme.png)
 
 ## The Pitch
 
@@ -83,7 +80,7 @@ General features include:
   - `<table>`: Self-explanatory!
 
   See the documentation about
-  [elements](https://pytest-mock-resources.readthedocs.io/en/latest/elements.html) for more details
+  [elements](https://htmxl.readthedocs.io/en/latest/design/elements.html) for more details
 
 - Styling
 
@@ -91,8 +88,8 @@ General features include:
   rowspan/colspan `colspan="2"` have been implemented, but there's no reason that various different
   options that make intuitive sense (like colors) could be implemented also
 
-  See the documentation about
-  [styling](https://pytest-mock-resources.readthedocs.io/en/latest/styling.html) for more details
+  See the documentation about [styling](https://htmxl.readthedocs.io/en/latest/design/styling.html)
+  for more details
 
 - Classes
 
@@ -106,7 +103,7 @@ General features include:
   Workbook(styles=styles)
   ```
 
-## Installing
+## Installation
 
 ``` bash
 pip install htmxl
