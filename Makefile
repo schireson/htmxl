@@ -1,7 +1,7 @@
 .PHONY: install format bump lint test build
 
 install:
-	pip install -e .
+	poetry install -E beautifulsoup -E lxml
 
 format:
 	isort --recursive --quiet src tests

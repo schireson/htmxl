@@ -3,12 +3,12 @@
 import logging
 import uuid
 
-import bs4
 import jinja2
 import openpyxl
 
 from htmxl.compose.style import Styler
 from htmxl.compose.write import write, Writer
+from htmxl.token import get_parser
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ jinja_env = jinja2.Environment(trim_blocks=True, lstrip_blocks=True, autoescape=
 
 
 class Workbook:
-    def __init__(self, styles=None, workbook_kwargs=None):
+    def __init__(self, styles=None, workbook_kwargs=None, *, parser=None):
         if workbook_kwargs is None:
             workbook_kwargs = {}
 
@@ -24,9 +24,10 @@ class Workbook:
         self.wb.remove(self.wb.worksheets[0])
         self.worksheets = []
         self.styler = Styler(self.wb, styles)
+        self.parser = parser
 
-    def new_worksheet(self):
-        worksheet = Worksheet(styler=self.styler, wb=self.wb)
+    def new_worksheet(self, parser=None):
+        worksheet = Worksheet(styler=self.styler, wb=self.wb, parser=parser or self.parser)
         self.worksheets.append(worksheet)
 
         return worksheet
@@ -38,11 +39,11 @@ class Workbook:
         with open(template_file, "r") as f:
             return self.add_sheet_from_template(template=f.read(), data=data)
 
-    def add_sheet_from_template(self, template, data=None):
+    def add_sheet_from_template(self, template, data=None, parser=None):
         if data is None:
             data = {}
 
-        worksheet = self.new_worksheet()
+        worksheet = self.new_worksheet(parser=parser or self.parser)
         worksheet.template = jinja_env.from_string(template)
         worksheet.data = data
         return worksheet
@@ -63,21 +64,25 @@ class Workbook:
 
 
 class Worksheet:
-    def __init__(self, wb, styler):
+    def __init__(self, wb, styler, parser=None):
         self.sheet_name = str(uuid.uuid4())[0:8]
         self.writer = Writer(wb.create_sheet(self.sheet_name))
         self.styler = styler
         self.data = {}
         self.template = None
+        self.parser = parser
 
     @property
     def worksheet(self):
         return self.writer.sheet
 
     @property
-    def soup(self):
-        logger.debug("Making soup for sheet <{}>".format(self.sheet_name))
-        return bs4.BeautifulSoup(self.rendered, features="html.parser")
+    def tree(self):
+        logger.debug(
+            "Parsing the template into a tree of nodes for sheet <{}>".format(self.sheet_name)
+        )
+        parser = get_parser(self.parser)
+        return parser.parse_str(self.rendered)
 
     @property
     def rendered(self):
@@ -85,13 +90,5 @@ class Worksheet:
         return self.template.render(self.data)
 
     def write(self):
-        sheet_name = self.soup.title.text if self.soup.title else self.sheet_name
-        logger.debug(
-            "Updating sheet name from rendered template: {} -> {}".format(
-                self.sheet_name, sheet_name
-            )
-        )
-        self.sheet_name = sheet_name
-        self.writer.sheet.title = self.sheet_name
         logger.debug("Writing sheet <{}>".format(self.sheet_name))
-        write(element=self.soup, writer=self.writer, styler=self.styler)
+        write(element=self.tree, writer=self.writer, styler=self.styler)

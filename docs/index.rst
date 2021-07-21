@@ -8,6 +8,7 @@ Schireson Excel
    introduction
    design/index
    how-tos/index
+   compatibility
    api/index
 
 
