@@ -6,7 +6,7 @@ Schireson Excel
    :caption: Contents:
 
    introduction
-   library_design
+   design/index
    how-tos/index
    api/index
 
