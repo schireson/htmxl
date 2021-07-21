@@ -1,16 +1,14 @@
 """A module dedicated to writing data to a workbook."""
 import ast
 import datetime
-import functools
 import logging
-import string
 from contextlib import contextmanager
-from math import floor
 
 import openpyxl.styles
 import pendulum
 
 import htmxl.compose.attributes
+from htmxl.alphabet import alphabet
 from htmxl.compose.style import style_range
 from htmxl.token import TokenStream
 
@@ -447,19 +445,6 @@ def write_span(element, writer, styler, style):
     return element, recording
 
 
-def _column_letters():
-    def _convert_number_to_letter(num):
-        if num >= 26:
-            return _convert_number_to_letter(floor(num / 26) - 1) + string.ascii_uppercase[num % 26]
-        else:
-            return string.ascii_uppercase[num]
-
-    itr = 0
-    while True:
-        yield _convert_number_to_letter(itr)
-        itr += 1
-
-
 def calculate_bounding_cells(cells):
     min_row = min(cell.row for cell in cells)
     min_col = min(cell.col for cell in cells)
@@ -475,34 +460,3 @@ def calculate_bounding_cells(cells):
 def get_bounding_ref(cells):
     min_cell, max_cell = calculate_bounding_cells(cells)
     return "{}:{}".format(min_cell.ref, max_cell.ref)
-
-
-class _Alphabet:
-    def __init__(self, starting_length=26):
-        self.letter_list = []
-        self.column_letter_factory = _column_letters()
-        for _ in range(starting_length):
-            self._generate_more_letters()
-
-    def index(self, value):
-        num_letters = len(self.letter_list)
-        if num_letters < len(value) * 26:
-            for i in range(num_letters, len(value) * 26):
-                self._generate_more_letters()
-
-        return self.letter_list.index(value)
-
-    def __getitem__(self, item):
-        if len(self.letter_list) - 1 < item:
-            for i in range(item - len(self.letter_list) + 1):
-                self.letter_list.append(next(self.column_letter_factory))
-        return self.letter_list[item]
-
-    def _generate_more_letters(self):
-        self.letter_list.append(next(self.column_letter_factory))
-
-    def __repr__(self):
-        return "Alphabet(num_letters={})".format(len(self.letter_list))
-
-
-alphabet = _Alphabet()
