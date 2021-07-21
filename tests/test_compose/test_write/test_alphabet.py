@@ -1,6 +1,6 @@
 import pytest
 
-from htmxl.compose.write import _column_letters
+from htmxl.alphabet import _column_letters
 
 
 @pytest.mark.this

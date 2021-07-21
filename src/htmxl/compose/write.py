@@ -1,6 +1,7 @@
 """A module dedicated to writing data to a workbook."""
 import ast
 import datetime
+import functools
 import logging
 from contextlib import contextmanager
 
@@ -8,7 +9,8 @@ import openpyxl.styles
 import pendulum
 
 import htmxl.compose.attributes
-from htmxl.alphabet import alphabet
+from htmxl.compose.cell import Cell
+from htmxl.compose.recording import Recording
 from htmxl.compose.style import style_range
 from htmxl.token import TokenStream
 
@@ -89,8 +91,8 @@ class Writer:
 
     @contextmanager
     def record(self):
-        recording = []
-        recording_id = id(recording)
+        recording = Recording()
+        recording_id = recording.id()
 
         self._recordings[recording_id] = recording
         yield recording
@@ -226,45 +228,6 @@ def write_head(element, writer):
         writer.sheet.title = element
 
 
-class Cell:
-    def __init__(self, ref="A1"):
-        for idx, char in enumerate(ref):
-            if char.isdigit():
-                col = ref[0:idx]
-                row = int(ref[idx:])
-                break
-        self._col = col
-        self._row = row
-
-    @classmethod
-    def from_location(cls, col, row):
-        ref = "{}{}".format(alphabet[col - 1], row)
-        return cls(ref)
-
-    @property
-    def row(self):
-        return int(self._row)
-
-    @property
-    def row_ref(self):
-        return str(self._row)
-
-    @property
-    def col_ref(self):
-        return self._col
-
-    @property
-    def col(self):
-        return alphabet.index(self._col) + 1
-
-    @property
-    def ref(self):
-        return "{}{}".format(self._col, self._row)
-
-    def __repr__(self):
-        return "{}('{}')".format(self.__class__.__name__, self.ref)
-
-
 def return_cursor(strategy):
     def wrapper(fn):
         @functools.wraps(fn)
@@ -278,7 +241,7 @@ def return_cursor(strategy):
                 element, recording = result
 
                 if recording:
-                    _, bottom_right = calculate_bounding_cells(recording)
+                    _, bottom_right = recording.bounding_cells
                     row = bottom_right.row
 
                 writer.move_to(col=column, row=row)
@@ -370,7 +333,7 @@ def write_th(element, writer, styler, style):
 
     if len(recording) > 1:
         if rowspan or colspan:
-            merge_ref = get_bounding_ref(recording)
+            merge_ref = recording.bounding_ref
             writer.sheet.merge_cells(merge_ref)
             if style:
                 style_name = styler.calculate_style(style)
@@ -392,7 +355,7 @@ def write_table(element, writer, styler, style):
             write(sub_component, writer, styler, style)
 
     if autofilter == "true":
-        bounding_ref = get_bounding_ref(recording)
+        bounding_ref = recording.bounding_ref
         writer.auto_filter(bounding_ref)
 
     return element, recording
@@ -445,18 +408,9 @@ def write_span(element, writer, styler, style):
     return element, recording
 
 
-def calculate_bounding_cells(cells):
-    min_row = min(cell.row for cell in cells)
-    min_col = min(cell.col for cell in cells)
-    max_row = max(cell.row for cell in cells)
-    max_col = max(cell.col for cell in cells)
-
-    return (
-        Cell.from_location(row=min_row, col=min_col),
-        Cell.from_location(row=max_row, col=max_col),
-    )
+def by_row(cell):
+    return cell.row
 
 
-def get_bounding_ref(cells):
-    min_cell, max_cell = calculate_bounding_cells(cells)
-    return "{}:{}".format(min_cell.ref, max_cell.ref)
+def by_col(cell):
+    return cell.row
