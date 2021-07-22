@@ -4,19 +4,25 @@ from htmxl.alphabet import alphabet
 
 
 @functools.lru_cache()
-def calculate_row_col(ref):
-    for idx, char in enumerate(ref):
-        if char.isdigit():
-            row = int(ref[idx:])
-            col = ref[0:idx]
-            break
+def split_col_row(ref):
+    """Split the letter and number components of a cell reference.
 
-    return (col, row)
+    Examples:
+        >>> split_col_row('A1')
+        ('A', 1)
+        >>> split_col_row('B100')
+        ('B', 100)
+        >>> split_col_row('CC12')
+        ('CC', 12)
+    """
+    head = ref.rstrip("0123456789")
+    tail = ref[len(head) :]
+    return head, int(tail)
 
 
 class Cell:
     def __init__(self, ref="A1"):
-        col, row = calculate_row_col(ref)
+        col, row = split_col_row(ref)
 
         self.row = row
         self.row_ref = str(row)
