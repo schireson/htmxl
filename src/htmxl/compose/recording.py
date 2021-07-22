@@ -1,12 +1,11 @@
-from dataclasses import dataclass, field
-from typing import List
+from dataclasses import dataclass
 
 from htmxl.compose.cell import Cell
 
 
 @dataclass
 class Recording:
-    cells: List[Cell] = field(default_factory=list)
+    count: int = 0
 
     min_row: int = 1
     min_col: int = 1
@@ -29,13 +28,13 @@ class Recording:
         if cell_col > self.max_col:
             self.max_col = cell_col
 
-        self.cells.append(cell)
+        self.count += 1
 
     def id(self):
         return id(self)
 
     def __len__(self):
-        return len(self.cells)
+        return self.count
 
     @property
     def bounding_cells(self):
