@@ -7,7 +7,7 @@ import jinja2
 import openpyxl
 
 from htmxl.compose.style import Styler
-from htmxl.compose.write import write, Writer
+from htmxl.compose.write import Writer
 from htmxl.token import get_parser
 
 logger = logging.getLogger(__name__)
@@ -91,4 +91,4 @@ class Worksheet:
 
     def write(self):
         logger.debug("Writing sheet <{}>".format(self.sheet_name))
-        write(element=self.tree, writer=self.writer, styler=self.styler)
+        self.writer.write(element=self.tree, styler=self.styler)

@@ -54,9 +54,9 @@ class Bs4Stream(TokenStream):
             if isinstance(node, bs4.element.NavigableString):
                 text = node.strip()
                 if text:
-                    yield text
+                    yield self.__class__(None, "string", text=text)
             else:
-                yield self.__class__.from_node(node)
+                yield self.from_node(node)
 
 
 @dataclass(frozen=True)
@@ -84,12 +84,14 @@ class LxmlStream(TokenStream):
     def content(self):
         for node in self.node.iterchildren():
             if node.text:
-                yield node.text.strip()
+                text = node.text.strip()
+                yield self.__class__(None, "string", text=text)
 
             yield self.__class__.from_node(node)
 
             if node.tail:
-                yield node.tail.strip()
+                text = node.tail.strip()
+                yield self.__class__(None, "string", text=text)
 
 
 _parsers_by_name = {
