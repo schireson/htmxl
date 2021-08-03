@@ -1,48 +1,9 @@
 import datetime
-import textwrap
 
-from htmxl.compose import Workbook, Worksheet
+from htmxl.compose import Workbook
 
-template = textwrap.dedent(
-    """\
-    <head>
-        <title>{{ title }}</title>
-    </head>
-    <body>
-        <div>
-            <span style="width: 5ch;">__BLANK__</span>
-            <span>Table Subject</span>
-            <span>{{ subject }}</span>
-        </div>
-        <br>
-        <div>
-            <span></span>
-            <span>
-                <table>
-                    <thead>
-                        <tr>
-                            {% for column_name in column_names %}
-                                <th>{{ column_name }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in rows %}
-                            <tr>
-                                <td style="width: 30ch;" class="{{ loop.cycle('odd', 'even')}}">{{ row.State }}</td>
-                                <td style="width: 30ch;" class="{{ loop.cycle('odd', 'even')}}">{{ row.City }}</td>
-                                <td data-type="date" style="width: 30ch;" class="{{ loop.cycle('odd-date', 'even-date')}}">{{ row.Date}}</td>
-                                <td data-type="date" style="width: 30ch;" class="{{ loop.cycle('odd-date', 'even-date')}}">{{ row["Other Date"]}}</td>
-                                <td data-type="int" style="width: 30ch;" class="{{ loop.cycle('odd', 'even')}}">{{ row.Count }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table
-            </span>
-        </div>
-    </body>
-"""
-)
+with open('examples/header_with_table.jinja2') as f:
+    template = f.read()
 
 data = [
     {

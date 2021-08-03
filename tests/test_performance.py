@@ -3,32 +3,6 @@ import time
 
 from htmxl.compose import Workbook
 
-template = """
-<head>{{ title }}</head>
-<body>
-  <div>
-    Hello down there, {{ name }}!
-  </div>
-  <table>
-    <thead>
-      <tr>
-        {% for column_name in column_names %}
-          <th>{{ column_name }}</th>
-        {% endfor %}
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in rows %}
-        <tr>
-          <td>{{ row.a }}</td>
-          <td>{{ row.b }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</body>
-"""
-
 data = dict(
     title="Hello World",
     name="Bob",
@@ -38,6 +12,9 @@ data = dict(
 
 
 def test_large_dataset():
+    with open("tests/test_performance.jinja2") as f:
+        template = f.read()
+
     start = time.perf_counter()
     workbook = Workbook(parser="beautifulsoup")
     workbook.add_sheet_from_template(template=template, data=data)
