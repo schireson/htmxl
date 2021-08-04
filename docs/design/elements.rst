@@ -127,3 +127,29 @@ below the :code:`<tr>`.
 ~~~~~~~
 These elements are semantically equivalent to a :code:`<span>`, but for the purpose of defining
 a table's cell content.
+
+<datalist>
+~~~~~~~~~~
+A :code:`<datalist>` element does not get directly rendered into the excel file. As such
+a datalist element will not have any effect on the placement of the cursor or layout
+of actual DOM elements.
+
+Referencing the `documentation <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/datalist>`_ on what a datalist does, it will register the set of :code:`<option>` children as a form of cell validation in the document.
+
+For example:
+
+.. code-block:: html
+
+   <datalist id="truthy-values">
+     <option value="true" />
+     <option value="false" />
+     <option value="maybe" />
+   </datalist>
+
+   <input list="truthy-values">
+
+In this case, an excel data validation will be registered and then applied to the cell pointed at by the :code:`<input>`.
+
+That will then be represented in the excel file like so
+
+.. image:: /_static/datalist_example.png

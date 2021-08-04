@@ -4,12 +4,12 @@ Parser Compatibility
 By default, the package will detect installed parser libraries and choose the first one we find, so
 a vanilla `Workbook()` instantiation should Just Work.
 
-``` python
-from htmxl.compose import Workbook
+.. code-block:: python
 
-workbook = Workbook(parser='beautifulsoup')
-workbook = Workbook(parser='lxml')
-```
+   from htmxl.compose import Workbook
+
+   workbook = Workbook(parser='beautifulsoup')
+   workbook = Workbook(parser='lxml')
 
 Importantly, the parsers will not exhibit identical behavior when handed the same templates.
 In general the :code:`lxml` parser will be stricter and more prone to requiring "correct" HTML, while
@@ -28,7 +28,7 @@ parser, while it might fail (raise an Exception) with lxml.
 
 Consider 
 
-.. code-block::
+.. code-block:: html
 
    <div>
       <span>Foo
@@ -39,7 +39,7 @@ block.
 
 Also consider
 
-.. code-block::
+.. code-block:: html
 
    <div>
       Foo
