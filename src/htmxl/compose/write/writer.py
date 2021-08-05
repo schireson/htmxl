@@ -7,6 +7,7 @@ import openpyxl.styles
 from htmxl.compose.cell import Cell
 from htmxl.compose.recording import Recording
 from htmxl.compose.style import style_range
+from htmxl.compose.vdom import VDom
 from htmxl.compose.write import elements
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,7 @@ class Writer:
         self.sheet = sheet
         self._recordings = {}
         self._validations = {}
+        self.vdom = VDom()
 
         self._auto_filter_set = False
         self._element_handlers = {
@@ -61,6 +63,7 @@ class Writer:
         return self.sheet.cell(column=ref.col, row=ref.row)
 
     def write_cell(self, value, styler, style=None):
+        self.vdom.write(text=value, style=style)
         cell = self.sheet.cell(column=self.col, row=self.row, value=value)
 
         if style:
@@ -71,27 +74,28 @@ class Writer:
                 recording.append(self.current_cell)
 
     def move_down(self, num=1):
+        self.vdom.move_down()
         self.current_cell = Cell.from_location(col=self.col, row=self.row + num)
 
     def move_up(self, num=1):
+        self.vdom.move_up()
         if self.row == 1:
             return
 
         self.current_cell = Cell.from_location(col=self.col, row=self.row - num)
 
     def move_left(self, num=1):
+        self.vdom.move_left()
         if self.col == 1:
             return
         self.current_cell = Cell.from_location(col=self.col - num, row=self.row)
 
     def move_right(self, num=1):
+        self.vdom.move_right()
         self.current_cell = Cell.from_location(col=self.col + num, row=self.row)
 
-    def move(self, movement):
-        movement_function = getattr(self, "move_{}".format(movement))
-        movement_function()
-
     def move_to(self, col, row):
+        self.vdom.move_to(col - 1, row - 1)
         self.current_cell = Cell.from_location(col=col, row=row)
 
     @contextmanager
