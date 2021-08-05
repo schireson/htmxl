@@ -2,6 +2,7 @@ import ast
 import logging
 
 import pendulum
+from openpyxl.worksheet.datavalidation import DataValidation
 
 import htmxl.compose.attributes
 from htmxl.compose.write.decorators import CursorStrategy, return_cursor
@@ -51,7 +52,7 @@ def write_br(element, writer, styler, style):
     logger.debug("Writing <br> at {}".format(writer.ref))
     row = writer.row
     col = writer.col
-    value = writer.get_cell(writer.current_cell).value
+    value = writer.get_cell().value
     if value:
         writer.move_down()
         writer.move_down()
@@ -186,3 +187,35 @@ def write_span(element, writer, styler, style):
 
 def write_string(element, writer, styler, style):
     write_value(element.text, writer, styler, style)
+
+
+@return_cursor(CursorStrategy.top_right)
+def write_input(element, writer, styler, style):
+    logger.debug("Writing <input> at {}".format(writer.ref))
+
+    list_validation = element.get("list", None)
+    if list_validation:
+        writer.add_validation_to_cell(list_validation)
+
+    return element, []
+
+
+def create_datavalidation(element, writer, styler, style):
+    logger.debug("Creating <datalist> validation")
+
+    element_id = element.get("id", None)
+    if element_id is None:
+        raise ValueError('<datalist> requires an `id` attribute, such as `id="somevalue"`.')
+
+    options = []
+    for item in element.content():
+        if item.name != "option":
+            raise ValueError("<datalist> element only supports <option> type children.")
+
+        option = item.get("value", item.text)
+        options.append(option)
+
+    validation_formula = ",".join(options)
+    validation = DataValidation(type="list", formula1=f'"{validation_formula}"', allow_blank=True)
+    validation.hide_drop_down = False
+    writer.add_validation(element_id, validation)

@@ -17,6 +17,7 @@ class Writer:
         self.current_cell = Cell(ref)
         self.sheet = sheet
         self._recordings = {}
+        self._validations = {}
 
         self._auto_filter_set = False
         self._element_handlers = {
@@ -34,6 +35,8 @@ class Writer:
             "thead": elements.write_thead,
             "tbody": elements.write_tbody,
             "string": elements.write_string,
+            "datalist": elements.create_datavalidation,
+            "input": elements.write_input,
         }
 
     @property
@@ -51,7 +54,10 @@ class Writer:
     def write(self, element, styler):
         elements.write(writer=self, element=element, styler=styler)
 
-    def get_cell(self, ref):
+    def get_cell(self, *, ref=None):
+        if ref is None:
+            ref = self.current_cell
+
         return self.sheet.cell(column=ref.col, row=ref.row)
 
     def write_cell(self, value, styler, style=None):
@@ -155,3 +161,15 @@ class Writer:
 
     def style_range(self, reference_style, cell_range):
         style_range(self.sheet, reference_style, cell_range)
+
+    def add_validation(self, id, validation):
+        self._validations[id] = validation
+        self.sheet.add_data_validation(validation)
+
+    def add_validation_to_cell(self, validation_name):
+        validation = self._validations.get(validation_name)
+        if not validation:
+            raise ValueError(f"<datalist> validation with name '{validation_name}' does not exist")
+
+        current_cell = self.get_cell()
+        validation.add(current_cell)
