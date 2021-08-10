@@ -11,13 +11,14 @@ class WriteTests:
     fixture_dir = ""
     template_file = ""
     expected_result_file = ""
+    styles = []
 
     def load_result(self):
         return openpyxl.load_workbook(os.path.join(self.fixture_dir, self.expected_result_file))
 
     def load_source(self, parser):
         template_file = os.path.join(self.fixture_dir, self.template_file)
-        wb = Workbook(parser=parser)
+        wb = Workbook(parser=parser, styles=self.styles)
         wb.add_sheet_from_template_file(template_file)
         fileobj = BytesIO()
         wb.compose(fileobj)

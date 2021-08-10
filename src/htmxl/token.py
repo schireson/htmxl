@@ -1,6 +1,6 @@
 import importlib
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 
 @dataclass(frozen=True)
@@ -8,6 +8,7 @@ class TokenStream:
     node: Any
     name: str
     attrs: Dict[str, str] = field(default_factory=dict)
+    classes: Optional[List[str]] = None
     text: str = ""
 
     @classmethod
@@ -37,14 +38,18 @@ class Bs4Stream(TokenStream):
 
     @classmethod
     def from_node(cls, node):
+
         if node.name == "[document]":
             return cls(node=node, name="body")
+
+        classes = node.attrs.get("class", [])
 
         return cls(
             node=node,
             name=node.name,
             attrs=node.attrs,
             text=node.text,
+            classes=classes,
         )
 
     def content(self):
@@ -74,12 +79,14 @@ class LxmlStream(TokenStream):
 
     @classmethod
     def from_node(cls, node):
-        return cls(
-            node=node,
-            name=node.tag,
-            attrs=node.attrib,
-            text=node.text,
-        )
+        classes = node.attrib.get("class")
+        if classes:
+            # lxml represents classes as a string. We need a list.
+            # eg <div class="some-class some-other-class">
+            #  node.attrib.get("class") = "some-class some-other-class"
+            classes = classes.strip().split(" ")
+
+        return cls(node=node, name=node.tag, attrs=node.attrib, text=node.text, classes=classes)
 
     def content(self):
         for node in self.node.iterchildren():

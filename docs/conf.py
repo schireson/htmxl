@@ -8,11 +8,12 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+
+sys.path.insert(0, os.path.abspath(".."))
 
 project = "HTM(x)L"
-version = "0.8"
-release = "0.8"
+version = "0.8.1"
+release = "0.8.1"
 
 extensions = [
     "m2r2",
@@ -21,13 +22,13 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
-    "sphinx_autodoc_typehints"
+    "sphinx_autodoc_typehints",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
-source_suffix = ['.rst', '.md']
+source_suffix = [".rst", ".md"]
 
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]

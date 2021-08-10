@@ -36,7 +36,7 @@ class Styler:
             self.register_styles(styles)
 
     def get_style(self, element):
-        return element.get("class", [])
+        return element.classes
 
     def get_inline_style(self, element):
         inline_style = {}
