@@ -42,6 +42,19 @@ pydocstyle = "^6.1.1"
 pytest = ">=6.2.4"
 coverage = ">=5"
 
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = [
+  "pragma: no cover",
+  "if TYPE_CHECKING:",
+  "if __name__ == .__main__.:",
+]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
 [tool.isort]
 profile = 'black'
 known_first_party = 'htmxl,tests'
