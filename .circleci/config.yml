@@ -33,7 +33,19 @@ commands:
             curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
             echo 'export PATH="$HOME/.poetry/bin:$PATH"' >> $BASH_ENV
 
+  persist-coverage:
+    steps:
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .coverage
+            - coverage.xml
 
+  report-codecov:
+    steps:
+      - attach_workspace:
+          at: .
+      - run: bash <(curl -s https://codecov.io/bash)
 
 workflows:
   build_test:
@@ -48,6 +60,9 @@ workflows:
       - docs:
           requires:
               - build
+      - codecov:
+          requires:
+              - test
 
 jobs:
   build:
@@ -79,6 +94,7 @@ jobs:
           command: |
             source .venv/bin/activate
             make test
+      - persist-coverage
 
   lint:
     executor: main
@@ -109,3 +125,8 @@ jobs:
           root: .
           paths:
             - docs/_build/*
+
+  codecov:
+    executor: main
+    steps:
+      - report-codecov
