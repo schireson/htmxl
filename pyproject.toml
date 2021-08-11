@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "htmxl"
-version = "0.8.0"
+version = "0.8.1"
 description = "Produce Excel files from HTML templates."
 authors = [
     "Hunter Senft-Grupp <hunter@janux.io>",
@@ -41,6 +41,7 @@ mypy = "^0.902"
 pydocstyle = "^6.1.1"
 pytest = ">=6.2.4"
 coverage = ">=5"
+bumpversion = "^0.6.0"
 
 [tool.coverage.report]
 show_missing = true
