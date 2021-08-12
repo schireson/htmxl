@@ -72,16 +72,15 @@ def write_td(element, writer, styler, style):
     logger.debug("Writing <td> at {}".format(writer.ref))
     style = styler.get_style(element) or style
     with writer.record() as recording:
-        children = [child for child in element.content()]
+        if element.text:
+            data_type = _type_map[element.attrs.get("data-type")]
+            logger.debug("Setting cell {} to {}".format(writer.ref, data_type))
+            write_value(data_type(element.text.strip()), writer, styler, style)
 
+        children = [child for child in element.content()]
         for child in children:
-            if child.text:
-                data_type = _type_map[child.attrs.get("data-type")]
-                logger.debug("Setting cell {} to {}".format(writer.ref, data_type))
-                write_value(data_type(child.text.strip()), writer, styler, style)
-            else:
-                logging.debug("Recursing into element {}".format(child.name))
-                write(child, writer, styler, style)
+            logging.debug("Recursing into element {}".format(child.name))
+            write(child, writer, styler, style)
 
     return element, recording
 
