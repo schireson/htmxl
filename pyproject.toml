@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "htmxl"
-version = "0.8.1"
+version = "0.8.2"
 description = "Produce Excel files from HTML templates."
 authors = [
     "Hunter Senft-Grupp <hunter@janux.io>",
