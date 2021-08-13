@@ -198,12 +198,20 @@ def write_string(element, writer, styler, style):
 @return_cursor(CursorStrategy.top_right)
 def write_input(element, writer, styler, style):
     logger.debug("Writing <input> at {}".format(writer.ref))
+    style = styler.get_style(element) or style
 
+    recording = []
     list_validation = element.get("list", None)
     if list_validation:
         writer.add_validation_to_cell(list_validation)
+        with writer.record() as recording:
+            data_type = _type_map[element.attrs.get("data-type")]
+            list_default_value = element.attrs.get("value", "")
 
-    return element, []
+            logger.debug("Setting cell {} to {}".format(writer.ref, data_type))
+            write_value(data_type(list_default_value.strip()), writer, styler, style)
+
+    return element, recording
 
 
 def create_datavalidation(element, writer, styler, style):
