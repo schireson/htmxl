@@ -12,8 +12,8 @@ import sys
 sys.path.insert(0, os.path.abspath(".."))
 
 project = "HTM(x)L"
-version = "0.8.3"
-release = "0.8.3"
+version = "0.8.4"
+release = "0.8.4"
 
 extensions = [
     "m2r2",

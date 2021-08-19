@@ -1,9 +1,12 @@
+import math
 import os
 
 import openpyxl
 import pytest
+from openpyxl.cell.cell import MergedCell
 
 from htmxl.compose import Workbook
+from htmxl.compose.cell import Cell
 from htmxl.compose.compat import BytesIO
 
 
@@ -41,6 +44,7 @@ class WriteTests:
             for result_cell, expected_cell in zip(result_row, expected_row):
                 assert result_cell.value == expected_cell.value
                 assert result_cell.style == expected_cell.style
+                self.compare_width(result, result_cell, expected_result, expected_cell)
 
     def display(self, name, data):
         print(name)
@@ -53,3 +57,19 @@ class WriteTests:
             print(" | ".join(str(v) for v in row_values if v is not None))
         print("------")
         print()
+
+    def compare_width(self, result, result_cell, expected_result, expected_cell):
+        if isinstance(result_cell, MergedCell):
+            assert math.floor(
+                result.worksheets[0].column_dimensions[Cell(result_cell.coordinate).col_ref].width
+            ) == math.floor(
+                expected_result.worksheets[0]
+                .column_dimensions[Cell(expected_cell.coordinate).col_ref]
+                .width
+            )
+        else:
+            assert math.floor(
+                result.worksheets[0].column_dimensions[result_cell.column_letter].width
+            ) == math.floor(
+                expected_result.worksheets[0].column_dimensions[expected_cell.column_letter].width
+            )
