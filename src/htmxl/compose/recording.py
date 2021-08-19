@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import List
 
 from htmxl.compose.cell import Cell
 
@@ -6,6 +7,7 @@ from htmxl.compose.cell import Cell
 @dataclass
 class Recording:
     count: int = 0
+    cells: List[Cell] = field(default_factory=list)
 
     min_row: int = 1
     min_col: int = 1
@@ -29,6 +31,7 @@ class Recording:
             self.max_col = cell_col
 
         self.count += 1
+        self.cells.append(cell)
 
     def id(self):
         return id(self)

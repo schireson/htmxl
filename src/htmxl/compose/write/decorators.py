@@ -42,7 +42,7 @@ def return_cursor(strategy):
 
             writer.style_inline(
                 element=element,
-                included_cells=recording,
+                included_cells=recording.cells,
                 inline_style=styler.get_inline_style(element),
             )
 
