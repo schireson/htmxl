@@ -1,5 +1,5 @@
-![CircleCI](https://img.shields.io/circleci/build/gh/schireson/htmxl/master)
-[![codecov](https://codecov.io/gh/schireson/htmxl/branch/master/graph/badge.svg)](https://codecov.io/gh/schireson/htmxl)
+![CircleCI](https://img.shields.io/circleci/build/gh/schireson/htmxl/master) [![Coverage
+Status](https://coveralls.io/repos/github/schireson/htmxl/badge.svg?branch=master)](https://coveralls.io/github/schireson/htmxl?branch=master)
 [![Documentation](https://readthedocs.org/projects/htmxl/badge/?version=latest)](https://htmxl.readthedocs.io/en/latest/?badge=latest)
 
 ## Introduction
