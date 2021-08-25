@@ -45,7 +45,9 @@ commands:
     steps:
       - attach_workspace:
           at: .
-      - run: bash <(curl -s https://codecov.io/bash)
+      - run: |
+          pip install 'coverage[toml]' coveralls
+          coveralls
 
 workflows:
   build_test:
@@ -129,4 +131,6 @@ jobs:
   codecov:
     executor: main
     steps:
+      - checkout 
+      - install-package
       - report-codecov
