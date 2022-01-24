@@ -20,7 +20,6 @@ test:
 	coverage run -a -m py.test src tests
 	coverage report
 	coverage xml
-
-build:
-	docker build --build-arg VERSION=$(VERSION) . \
-		-t platform-actions -t 831655002651.dkr.ecr.us-east-1.amazonaws.com/media-activation/platform-actions
+	
+publish: build
+	poetry publish --build -u __token__ -p '${PYPI_PASSWORD}' --no-interaction
