@@ -1,6 +1,6 @@
 import pytest
 
-from htmxl.alphabet import _column_letters
+from htmxl.alphabet import _Alphabet, _column_letters
 
 
 @pytest.mark.this
@@ -41,3 +41,9 @@ def test_column_letter_factory():
         "AC",
         "AD",
     ]
+
+
+@pytest.mark.this
+def test_letters_generated_on_overflow():
+    alphabet = _Alphabet()
+    assert alphabet[26] == "AA"

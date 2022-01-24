@@ -37,7 +37,7 @@ class _Alphabet:
     def __getitem__(self, item):
         try:
             return self.letters[item]
-        except KeyError:
+        except (IndexError, KeyError):
             self._generate_more_letters(item)
             return self.letters[item]
 
