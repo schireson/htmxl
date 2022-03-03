@@ -70,7 +70,7 @@ class LxmlStream(TokenStream):
     def parse_str(cls, data: str):
         from lxml import etree
 
-        parser = etree.XMLParser(remove_blank_text=True)
+        parser = etree.XMLParser(remove_blank_text=True, recover=True)
 
         # Lxml requires a single top-level node.
         data = f"<root>{data}</root>"
