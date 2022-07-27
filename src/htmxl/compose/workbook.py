@@ -26,24 +26,29 @@ class Workbook:
         self.styler = Styler(self.wb, styles)
         self.parser = parser
 
-    def new_worksheet(self, parser=None):
-        worksheet = Worksheet(styler=self.styler, wb=self.wb, parser=parser or self.parser)
+    def new_worksheet(self, parser=None, sheet_name=None):
+        worksheet = Worksheet(
+            styler=self.styler,
+            wb=self.wb,
+            parser=parser or self.parser,
+            sheet_name=sheet_name,
+        )
         self.worksheets.append(worksheet)
 
         return worksheet
 
-    def add_sheet_from_template_file(self, template_file, data=None):
+    def add_sheet_from_template_file(self, template_file, data=None, sheet_name=None):
         if data is None:
             data = {}
 
         with open(template_file, "r") as f:
-            return self.add_sheet_from_template(template=f.read(), data=data)
+            return self.add_sheet_from_template(template=f.read(), data=data, sheet_name=sheet_name)
 
-    def add_sheet_from_template(self, template, data=None, parser=None):
+    def add_sheet_from_template(self, template, data=None, parser=None, sheet_name=None):
         if data is None:
             data = {}
 
-        worksheet = self.new_worksheet(parser=parser or self.parser)
+        worksheet = self.new_worksheet(parser=parser or self.parser, sheet_name=sheet_name)
         worksheet.template = jinja_env.from_string(template)
         worksheet.data = data
         return worksheet
@@ -64,8 +69,8 @@ class Workbook:
 
 
 class Worksheet:
-    def __init__(self, wb, styler, parser=None):
-        self.sheet_name = str(uuid.uuid4())[0:8]
+    def __init__(self, wb, styler, parser=None, sheet_name=None):
+        self.sheet_name = sheet_name or str(uuid.uuid4())[0:8]
         self.writer = Writer(wb.create_sheet(self.sheet_name))
         self.styler = styler
         self.data = {}
