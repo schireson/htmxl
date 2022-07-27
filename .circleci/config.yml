@@ -81,8 +81,8 @@ jobs:
           root: .
           # Must be relative path from root
           paths:
-            - dist/htmxl-0.8.5.tar.gz
-            - dist/htmxl-0.8.5-py3-none-any.whl
+            - dist/htmxl-*.tar.gz
+            - dist/htmxl-*-py3-none-any.whl
 
   test:
     executor: main

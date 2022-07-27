@@ -103,7 +103,9 @@ def write_th(element, writer, styler, style):
     with writer.record() as recording:
         data_type = _type_map[element.attrs.get("data-type")]
         logger.debug("Setting cell {} to {}".format(writer.ref, data_type))
-        write_value(data_type(element.text.strip()), writer, styler, style)
+        write_value(
+            data_type(element.text.strip() if element.text else None), writer, styler, style
+        )
 
         colspan = int(element.attrs.get("colspan", 1))
         rowspan = int(element.attrs.get("rowspan", 1))
